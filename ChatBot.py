@@ -120,7 +120,7 @@ def next(message):
     if message.chat.username is None:
         bot.send_message(user_id, m_is_not_user_name)
         return
-        
+
     else:
         add_users(chat=message.chat)
 
@@ -284,7 +284,12 @@ def echo(call):
         user_id = call.message.chat.id
         user_to_id = None
 
-        add_users(chat=call.message.chat)
+        if message.chat.username is None:
+            bot.send_message(user_id, m_is_not_user_name)
+            return
+        else:
+            add_users(chat=call.message.chat)
+        
 
         if len(free_users) < 2:
             bot.send_message(user_id, m_is_not_free_users)
