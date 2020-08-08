@@ -284,7 +284,7 @@ def echo(call):
         user_id = call.message.chat.id
         user_to_id = None
 
-        if message.chat.username is None:
+        if call.message.chat.username is None:
             bot.send_message(user_id, m_is_not_user_name)
             return
         else:
