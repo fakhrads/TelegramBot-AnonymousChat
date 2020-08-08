@@ -66,11 +66,11 @@ def echo(message):
     user_id = message.chat.id
     user_to_id = None
 
-    add_users(chat=message.chat)
-
     if message.chat.username is None:
         bot.send_message(user_id, m_is_not_user_name)
         return
+    else:
+        add_users(chat=message.chat)
 
     if len(free_users) < 2:
         bot.send_message(user_id, m_is_not_free_users)
@@ -108,9 +108,7 @@ def next(message):
     user_id = message.chat.id
     user_to_id = None
 
-    if message.chat.username is None:
-        bot.send_message(user_id, m_is_not_user_name)
-        return
+    
 
     if message.chat.id in communications:
 
@@ -119,9 +117,12 @@ def next(message):
         tmp_id = communications[user_id]['UserTo']
         delete_info(tmp_id)
 
-    delete_user_from_db(user_id)
-
-    add_users(chat=message.chat)
+    if message.chat.username is None:
+        bot.send_message(user_id, m_is_not_user_name)
+        return
+        
+    else:
+        add_users(chat=message.chat)
 
     if len(free_users) < 2:
         bot.send_message(user_id, m_is_not_free_users)
