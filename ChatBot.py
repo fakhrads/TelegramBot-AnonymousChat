@@ -14,12 +14,24 @@ def inline_menu():
     Create inline menu for new chat
     :return: InlineKeyboardMarkup
     """
-    callback = types.InlineKeyboardButton(text='\U00002709 New chat', callback_data='NewChat')
+    callback = types.InlineKeyboardButton(text='\U00002709 Find Partner', callback_data='NewChat')
     menu = types.InlineKeyboardMarkup()
     menu.add(callback)
 
     return menu
 
+def like_menu():
+    """
+    Create inline menu for new chat
+    :return: InlineKeyboardMarkup
+    """
+    like = types.InlineKeyboardButton(text='👍🏻 Suka', callback_data='like_str')
+    dislike = types.InlineKeyboardButton(text='👎🏻 Tidak Suka', callback_data='dislike_str')
+    menu = types.InlineKeyboardMarkup()
+    menu.add(dislike)
+    menu.add(like)
+
+    return menu
 
 def generate_markup():
     """
@@ -27,8 +39,8 @@ def generate_markup():
     :return: ReplyKeyboardMarkup
     """
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=False, resize_keyboard=True)
-    #markup.add(like_str)
-    #markup.add(dislike_str)
+    markup.add(like_str)
+    markup.add(dislike_str)
     return markup
 
 
@@ -44,24 +56,95 @@ def connect_user(user_id):
         return False
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start','search'])
 def echo(message):
     """
     Make the user in Data Base.
     :param message:
     :return:
     """
-    message.chat.type = 'private'
     user_id = message.chat.id
+    user_to_id = None
+
+    add_users(chat=message.chat)
 
     if message.chat.username is None:
         bot.send_message(user_id, m_is_not_user_name)
         return
 
-    menu = inline_menu()
+    if len(free_users) < 2:
+        bot.send_message(user_id, m_is_not_free_users)
+        return
 
-    bot.send_message(user_id, m_start, reply_markup=menu)
+    if free_users[user_id]['state'] == 0:
+        return
 
+    for user in free_users:
+        if user['state'] == 0:
+            user_to_id = user['ID']
+            break
+
+    if user_to_id is None:
+        bot.send_message(user_id, m_is_not_free_users)
+        return
+
+    
+
+    keyboard = generate_markup()
+
+    add_communications(user_id, user_to_id)
+
+    bot.send_message(user_id, m_is_connect, reply_markup=keyboard)
+    bot.send_message(user_to_id, m_is_connect, reply_markup=keyboard)
+
+@bot.message_handler(commands=['next'])
+def next(message):
+    """
+    This function is use for end current dialog and find next partner.
+    :param message:
+    :return:
+    """
+    menu = types.ReplyKeyboardRemove()
+    user_id = message.chat.id
+    user_to_id = None
+
+    if message.chat.username is None:
+        bot.send_message(user_id, m_is_not_user_name)
+        return
+
+    if message.chat.id in communications:
+
+        bot.send_message(communications[user_id]['UserTo'], m_disconnect_user, reply_markup=menu)
+
+        tmp_id = communications[user_id]['UserTo']
+        delete_info(tmp_id)
+
+    delete_user_from_db(user_id)
+
+    add_users(chat=message.chat)
+
+    if len(free_users) < 2:
+        bot.send_message(user_id, m_is_not_free_users)
+        return
+
+    if free_users[user_id]['state'] == 0:
+        return
+
+    for user in free_users:
+        if user['state'] == 0:
+            user_to_id = user['ID']
+            break
+
+    if user_to_id is None:
+        bot.send_message(user_id, m_is_not_free_users)
+        return
+
+    keyboard = generate_markup()
+
+    add_communications(user_id, user_to_id)
+
+    bot.send_message(user_id, m_is_connect, reply_markup=keyboard)
+    bot.send_message(user_to_id, m_is_connect, reply_markup=keyboard)
 
 @bot.message_handler(commands=['stop'])
 def echo(message):
@@ -81,8 +164,8 @@ def echo(message):
         delete_info(tmp_id)
 
     delete_user_from_db(user_id)
-
-    bot.send_message(user_id, m_good_bye)
+    menu = inline_menu()
+    bot.send_message(user_id, m_play_again, reply_markup=menu)
 
 
 @bot.message_handler(func=lambda call: call.text == like_str or call.text == dislike_str)
@@ -132,8 +215,13 @@ def echo(message):
     :param message:
     :return:
     """
-    print(message)
+    print(message.from_user.username," : ",message.text)
     user_id = message.chat.id
+
+    if message.chat.username is None:
+        bot.send_message(user_id, m_is_not_user_name)
+        return
+        
     if message.content_type == 'sticker':
         if not connect_user(user_id):
             return
@@ -219,6 +307,7 @@ def echo(call):
 
         bot.send_message(user_id, m_is_connect, reply_markup=keyboard)
         bot.send_message(user_to_id, m_is_connect, reply_markup=keyboard)
+        
 
 
 if __name__ == '__main__':

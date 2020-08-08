@@ -6,11 +6,13 @@ m_is_connect = 'Anda sudah terhubung dengan pengguna lain!'
 
 m_play_again = 'Ingin mengobrol dengan yang lainnya lagi?'
 
-m_is_not_user_name = 'Untuk menggunakan bot ini, kamu harus memiliki username telegram.'
+m_is_not_user_name = 'Untuk menggunakan bot ini, kamu harus memiliki username telegram. \n' \
+                    'Kamu bisa mengaturnya di settings->username.'
 
 m_good_bye = 'Bot: Selamat tinggal, senang bisa bertemu denganmu!'
 
-m_disconnect_user = 'Bot: Lawan bicaramu telah mengakhiri percakapan!'
+m_disconnect_user = 'Lawan bicaramu telah mengakhiri percakapan' \
+                    'Silahkan klik tombol dibawah ini untuk mulai percakapan baru'
 
 m_failed = 'Bot: Terdapat kesalahan!'
 
@@ -27,6 +29,8 @@ m_has_not_dialog = 'Kamu sedang tidak masuk ke obrolan'
 dislike_str = '\U0001F44E Dislike'
 
 like_str = '\U0001F44D Like'
+
+
 
 
 def m_all_like(x):
