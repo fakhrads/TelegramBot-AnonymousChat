@@ -1,12 +1,12 @@
-import telebot
+import telebot, asyncio
 from telebot import types
 
 from Messages import *
 from dataEgine import *
 
 
-access_token = 'YOUR_TOKEN'
-bot = telebot.TeleBot(access_token)
+access_token = '1324185462:AAGd_qALljxrqUFVJ7jdhVayo_rK6id9ANM'
+bot = telebot.AsyncTeleBot(access_token)
 
 
 def inline_menu():
@@ -27,8 +27,8 @@ def generate_markup():
     :return: ReplyKeyboardMarkup
     """
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=False, resize_keyboard=True)
-    markup.add(like_str)
-    markup.add(dislike_str)
+    #markup.add(like_str)
+    #markup.add(dislike_str)
     return markup
 
 
@@ -132,6 +132,7 @@ def echo(message):
     :param message:
     :return:
     """
+    print(message)
     user_id = message.chat.id
     if message.content_type == 'sticker':
         if not connect_user(user_id):
@@ -166,17 +167,19 @@ def echo(message):
     elif message.content_type == 'text':
         if message.text != '/start' and message.text != '/stop' and \
                     message.text != dislike_str and message.text != like_str and message.text != 'NewChat':
-
+            print(message.message_id)
             if not connect_user(user_id):
                 return
 
             if message.reply_to_message is None:
                 bot.send_message(communications[user_id]['UserTo'], message.text)
             elif message.from_user.id != message.reply_to_message.from_user.id:
+                print(message.reply_to_message.message_id)
                 bot.send_message(communications[user_id]['UserTo'], message.text,
                                  reply_to_message_id=message.reply_to_message.message_id - 1)
             else:
-                bot.send_message(user_id, m_send_some_messages)
+                print(message.reply_to_message.message_id)
+                bot.send_message(communications[user_id]['UserTo'], message.text, reply_to_message_id=message.reply_to_message.message_id + 1)
 
 
 @bot.callback_query_handler(func=lambda call: True)
